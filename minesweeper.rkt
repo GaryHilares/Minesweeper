@@ -300,27 +300,54 @@
             (cond [(empty? b) (error "y not in bounds.")]
                   [(zero? y) (cons (reveal--row (first b) x0) (rest b))]
                   [else (cons (first b) (reveal--board (rest b) (sub1 y)))]))]
-  (reveal--board b0 y0)))
+    (reveal--board b0 y0)))
 
 
-(@htdf create-game)
-(@signature Natural -> Board)
-;; Creates Board with k mines at random positions.
+(@htdf create-board)
+(@signature Natural Natural Natural -> Board)
+;; Creates a nxm-sized Board with k mines at random positions.
+#; (define (add-mines n m k) B5)
 ;; !!! Add check-expects
 
-(@template-origin fn-composition)
-(define (create-game k)
-  (add-numbers (add-mines k)))
-
-(@htdf add-mines)
-(@signature Natural -> Board)
-;; Creates a Board with the given amount of mines.
-;; !!!
-(define (add-mines k) B5)
-
-
-(@htdf add-numbers)
-(@signature Board -> Board)
-;; Given board, adds number at correct positions.
-;; !!!
-(define (add-numbers b) B5) ; stub
+;; !!! Add template-origin
+(define (create-board n m k)
+  (local [(define (lst-get lst n)
+            (cond [(empty? lst) (error "Index out of range")]
+                  [(zero? n) (first lst)]
+                  [else (lst-get (rest lst) (sub1 n))]))
+          (define (lst-remove lst n)
+            (cond [(empty? lst) (error "Index out of range")]
+                  [(zero? n) (rest lst)]
+                  [else (cons (first lst) (lst-remove (rest lst) (sub1 n)))]))
+          (define (random-choices lst n)
+            (cond [(zero? n) empty]
+                  [else
+                   (local [(define random-choice (random (length lst)))]
+                     (cons (lst-get lst random-choice)
+                           (random-choices (lst-remove lst random-choice)
+                                           (sub1 n))))]))
+          (define (generate-tile-number mine-positions y x)
+            (if (member? (+ (* y n) x) mine-positions)
+                MINE
+                (+ (if (member? (+ (sub1 x) (* (sub1 y) n)) mine-positions) 1 0)
+                   (if (member? (+ x (* (sub1 y) n)) mine-positions) 1 0)
+                   (if (member? (+ (add1 x) (* (sub1 y) n)) mine-positions) 1 0)
+                   (if (member? (+ (sub1 x) (* y n)) mine-positions) 1 0)
+                   (if (member? (+ x (* y n)) mine-positions) 1 0)
+                   (if (member? (+ (add1 x) (* y n)) mine-positions) 1 0)
+                   (if (member? (+ (sub1 x) (* (add1 y) n)) mine-positions) 1 0)
+                   (if (member? (+ x (* (add1 y) n)) mine-positions) 1 0)
+                   (if (member? (+ (add1 x) (* (add1 y) n)) mine-positions)
+                       1
+                       0))))
+          (define (generate-row mine-positions y x)
+            (cond [(= x n) empty]
+                  [else (cons (make-tile
+                               (generate-tile-number mine-positions y x)
+                               false)
+                              (generate-row mine-positions y (add1 x)))]))
+          (define (generate-map mine-positions y)
+            (cond [(= y m) empty]
+                  [else (cons (generate-row mine-positions y 0)
+                              (generate-map mine-positions (add1 y)))]))]
+    (generate-map (random-choices (build-list (* n m) identity) k) 0)))
