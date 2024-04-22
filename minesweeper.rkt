@@ -74,7 +74,7 @@
 
 (@htdf main)
 (@signature Board -> Board)
-;; Start the game with (main B5).
+;; Start the game with (main (create-board <width> <height> <mine number>)).
 ;; <No check-expects for main function>.
 
 (@template-origin htdw-main)
@@ -333,7 +333,6 @@
                    (if (member? (+ x (* (sub1 y) n)) mine-positions) 1 0)
                    (if (member? (+ (add1 x) (* (sub1 y) n)) mine-positions) 1 0)
                    (if (member? (+ (sub1 x) (* y n)) mine-positions) 1 0)
-                   (if (member? (+ x (* y n)) mine-positions) 1 0)
                    (if (member? (+ (add1 x) (* y n)) mine-positions) 1 0)
                    (if (member? (+ (sub1 x) (* (add1 y) n)) mine-positions) 1 0)
                    (if (member? (+ x (* (add1 y) n)) mine-positions) 1 0)
