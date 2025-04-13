@@ -315,6 +315,9 @@
             (cond [(empty? lst) (error "Index out of range")]
                   [(zero? n) (first lst)]
                   [else (lst-get (rest lst) (sub1 n))]))
+          (define (is-mine-in-board? x y mines)
+            (and (>= x 0) (< x n) (>= y 0) (< y m)
+                 (member? (+ x (* y n)) mines)))
           (define (lst-remove lst n)
             (cond [(empty? lst) (error "Index out of range")]
                   [(zero? n) (rest lst)]
@@ -329,14 +332,14 @@
           (define (generate-tile-number mine-positions y x)
             (if (member? (+ (* y n) x) mine-positions)
                 MINE
-                (+ (if (member? (+ (sub1 x) (* (sub1 y) n)) mine-positions) 1 0)
-                   (if (member? (+ x (* (sub1 y) n)) mine-positions) 1 0)
-                   (if (member? (+ (add1 x) (* (sub1 y) n)) mine-positions) 1 0)
-                   (if (member? (+ (sub1 x) (* y n)) mine-positions) 1 0)
-                   (if (member? (+ (add1 x) (* y n)) mine-positions) 1 0)
-                   (if (member? (+ (sub1 x) (* (add1 y) n)) mine-positions) 1 0)
-                   (if (member? (+ x (* (add1 y) n)) mine-positions) 1 0)
-                   (if (member? (+ (add1 x) (* (add1 y) n)) mine-positions)
+                (+ (if (is-mine-in-board? (sub1 x) (sub1 y) mine-positions) 1 0)
+                   (if (is-mine-in-board? x (sub1 y) mine-positions) 1 0)
+                   (if (is-mine-in-board? (add1 x) (sub1 y) mine-positions) 1 0)
+                   (if (is-mine-in-board? (sub1 x) y mine-positions) 1 0)
+                   (if (is-mine-in-board? (add1 x) y mine-positions) 1 0)
+                   (if (is-mine-in-board? (sub1 x) (add1 y) mine-positions) 1 0)
+                   (if (is-mine-in-board? x (add1 y) mine-positions) 1 0)
+                   (if (is-mine-in-board? (add1 x) (add1 y) mine-positions)
                        1
                        0))))
           (define (generate-row mine-positions y x)
